@@ -1,80 +1,56 @@
-
 class Board
-  attr_accessor :knight, :chessboard
+  attr_accessor :chessboard
   def initialize
-    @knight = nil
-    @chessboard = init_chessboard
-  end
-
-  def init_chessboard
     @chessboard = Array.new(8){Array.new(8){Square.new}}
   end
 
-  
-  def possible_moves(x,y)
-  moves = []
-  moves << neighbour_exist?(x + 2, y - 1)
-  moves << neighbour_exist?(x + 2, y + 1)
-  moves << neighbour_exist?(x + 1, y - 2)
-  moves << neighbour_exist?(x + 1, y + 2)
-  moves << neighbour_exist?(x - 1, y - 2)
-  moves << neighbour_exist?(x - 1, y + 2)
-  moves << neighbour_exist?(x - 2, y - 1)
-  moves << neighbour_exist?(x - 2, y + 1)
-    moves.compact
-  end
-  
-  def neighbour_exist?(x,y)
-    (x >= 0 && x < 8) && (y >= 0 && y < 8) ? self.chessboard[x][y] : nil
-  end
-
-  def output_results(path,distance)
-    puts "You made it in #{distance} moves!"
-    puts "Here's your path:#{puts path}"
-  end
-
   def knight_moves(start,destination)
-    distance = 0
-    path = []
-    @knight = start
-    queue = [@knight]
+    queue = [start]
     visited = []
     until queue.empty?
-      return output_results(path,distance) if queue[0] == destination
-      self.chessboard.each_with_index do |sub, i|
-        sub.each_with_index do |cell,j|
-          if cell == queue[0] && !visited.include?(cell)
-            path<<"[#{i},#{j}]"
-            distance+=1
-            moves = possible_moves(i,j)
-            moves.each do |move|
-              queue << move if !visited.include?(move)
-            end
-           else
-            next
+
+     current_cell = queue.shift
+     return current_cell if current_cell == destination
+     
+     self.chessboard.each_with_index do |row,i|
+      row.each_with_index do |cell,j|
+        if cell == current_cell && !visited.include?(cell)
+          puts "[#{i},#{j}]"
+          moves = adjacent_squares(i,j)
+          moves.select!{|move| !visited.include?(move)}
+          queue.concat(moves)
         end
       end
     end
-    visited << queue.shift
+    visited << current_cell
+  end
+    end
+
+  
+  def adjacent_squares(i,j)
+    moves = []
+    possible_moves = [
+      [i + 2, j + 1], [i + 2, j - 1], [i - 2, j + 1], [i - 2, j - 1],
+      [i - 1, j + 2], [i - 1, j - 2], [i + 1, j - 2], [i + 1, j + 2]
+    ]
+    possible_moves.each do |move|
+      x,y = move
+      moves << valid_move?(x,y)
+    end
+    moves.compact
+  end
+
+  def valid_move?(x,y)
+    x.between?(0,7) && y.between?(0,7) ? self.chessboard[x][y] : nil
   end
 
 end
 
-end
- 
 class Square
-  attr_accessor :value
-  def initialize
-    @value = 0
-    
-  end
-  
-  
-end
 
+end
 
 board = Board.new
-start = board.chessboard[0][0]
+start = board.chessboard[3][3]
 destination = board.chessboard[3][3]
 board.knight_moves(start,destination)
-
