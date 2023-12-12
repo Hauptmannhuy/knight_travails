@@ -15,26 +15,31 @@ class Board
       path << current_cell
       return reconstruct_path(path, destination) if current_cell == destination
 
-      chessboard.each_with_index do |row, i|
-        row.each_with_index do |cell, j|
-          next unless cell == current_cell && !visited.include?(cell)
+      process_path(queue, visited, current_cell)
 
-          moves = adjacent_squares(i, j)
-          moves.select! { |move| !visited.include?(move) }
-          moves.each { |move| move.pointer = current_cell }
-          queue.concat(moves)
-        end
-      end
-      visited << current_cell
     end
     puts 'No path found.'
   end
 
-  def adjacent_squares(i, j)
+  def process_path(queue, visited, current_cell)
+    chessboard.each_with_index do |row, x|
+      row.each_with_index do |cell, y|
+        next unless cell == current_cell && !visited.include?(cell)
+
+        moves = adjacent_squares(x, y)
+        moves.select! { |move| !visited.include?(move) }
+        moves.each { |move| move.pointer = current_cell }
+        queue.concat(moves)
+      end
+    end
+    visited << current_cell
+  end
+
+  def adjacent_squares(x, y)
     moves = []
     possible_moves = [
-      [i + 2, j + 1], [i + 2, j - 1], [i - 2, j + 1], [i - 2, j - 1],
-      [i - 1, j + 2], [i - 1, j - 2], [i + 1, j - 2], [i + 1, j + 2]
+      [x + 2, y + 1], [x + 2, y - 1], [x - 2, y + 1], [x - 2, y - 1],
+      [x - 1, y + 2], [x - 1, y - 2], [x + 1, y - 2], [x + 1, y + 2]
     ]
     possible_moves.each do |move|
       x, y = move
@@ -74,6 +79,6 @@ class Square
 end
 
 board = Board.new
-start = board.chessboard[0][0]
+start = board.chessboard[3][3]
 destination = board.chessboard[7][7]
 board.knight_moves(start, destination)
